@@ -1,5 +1,5 @@
 Method: dense_title
-Timestamp: 2026-07-19T18:00:31.492190
+Timestamp: 2026-07-19T19:30:08.908557
 MAP@10: 0.1431
 Queries total: 500
 

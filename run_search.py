@@ -20,15 +20,19 @@ def main():
     run_step("Rewrite and encode queries", "src/rewrite_queries.py")
     run_step("Validate rewritten → titles", "src/search.py", "--method", "dense_rewritten_title", "--articles-path", "data/title_embeddings.parquet", "--calib-path", "data/calibration_query_embeddings_rewritten.parquet")
     run_step("Validate rewritten → bodies", "src/search.py", "--method", "dense_rewritten_body", "--articles-path", "data/article_body_embeddings.parquet", "--calib-path", "data/calibration_query_embeddings_rewritten.parquet")
+    run_step("Generate article titles", "src/generate_article_titles.py")
+    run_step("Validate generated → generated titles", "src/search.py", "--method", "dense_generated_title", "--articles-path", "data/generated_title_embeddings.parquet")
 
     print(f"\n{'='*60}")
     print("Search complete")
     print("  - data/calibration_query_embeddings.parquet")
-    print("  - results/runs/dense_title.txt")
+    print("  - results/runs/dense_title.txt (baseline: 0.1431)")
     print("  - results/runs/dense_body.txt")
     print("  - data/calibration_query_embeddings_rewritten.parquet")
     print("  - results/runs/dense_rewritten_title.txt")
     print("  - results/runs/dense_rewritten_body.txt")
+    print("  - data/generated_title_embeddings.parquet")
+    print("  - results/runs/dense_generated_title.txt")
     print(f"{'='*60}")
 
 

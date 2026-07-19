@@ -1,5 +1,5 @@
 Method: dense_rewritten_body
-Timestamp: 2026-07-19T18:07:59.022482
+Timestamp: 2026-07-19T19:36:12.961869
 MAP@10: 0.0784
 Queries total: 500
 

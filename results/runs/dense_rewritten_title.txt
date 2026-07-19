@@ -1,5 +1,5 @@
 Method: dense_rewritten_title
-Timestamp: 2026-07-19T18:07:58.621614
+Timestamp: 2026-07-19T19:36:12.549949
 MAP@10: 0.0478
 Queries total: 500
 
