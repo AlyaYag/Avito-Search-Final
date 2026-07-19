@@ -15,13 +15,20 @@ def run_step(description: str, *args: str) -> None:
 
 def main():
     run_step("Encode calibration queries", "src/encode_queries.py")
-    run_step("Search (validate + answer.csv)", "src/search.py")
+    run_step("Validate titles", "src/search.py", "--method", "dense_title", "--articles-path", "data/title_embeddings.parquet")
+    run_step("Validate bodies", "src/search.py", "--method", "dense_body", "--articles-path", "data/article_body_embeddings.parquet")
+    run_step("Rewrite and encode queries", "src/rewrite_queries.py")
+    run_step("Validate rewritten → titles", "src/search.py", "--method", "dense_rewritten_title", "--articles-path", "data/title_embeddings.parquet", "--calib-path", "data/calibration_query_embeddings_rewritten.parquet")
+    run_step("Validate rewritten → bodies", "src/search.py", "--method", "dense_rewritten_body", "--articles-path", "data/article_body_embeddings.parquet", "--calib-path", "data/calibration_query_embeddings_rewritten.parquet")
 
     print(f"\n{'='*60}")
     print("Search complete")
-    print("  - results/calibration_query_embeddings.parquet")
+    print("  - data/calibration_query_embeddings.parquet")
     print("  - results/runs/dense_title.txt")
-    print("  - results/answer.csv")
+    print("  - results/runs/dense_body.txt")
+    print("  - data/calibration_query_embeddings_rewritten.parquet")
+    print("  - results/runs/dense_rewritten_title.txt")
+    print("  - results/runs/dense_rewritten_body.txt")
     print(f"{'='*60}")
 
 

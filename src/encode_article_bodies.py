@@ -4,41 +4,40 @@ import pyarrow as pa
 from sentence_transformers import SentenceTransformer
 
 
-DATA_DIR = "candidate_data"
-OUTPUT_DIR = "data"
-ARTICLES_PATH = f"{DATA_DIR}/articles.f"
-OUTPUT_PATH = f"{OUTPUT_DIR}/title_embeddings.parquet"
+INPUT_PATH = "data/articles_cleaned.f"
+OUTPUT_PATH = "data/article_body_embeddings.parquet"
 MODEL_NAME = "BAAI/bge-m3"
+INSTRUCTION = "Represent this sentence for searching relevant passages: "
 
 
 def main():
-    articles = pd.read_feather(ARTICLES_PATH)
-    print(f"Loaded {len(articles)} articles from {ARTICLES_PATH}")
+    articles = pd.read_feather(INPUT_PATH)
+    print(f"Loaded {len(articles)} articles from {INPUT_PATH}")
 
-    titles = articles["title"].tolist()
     article_ids = articles["article_id"].tolist()
+    bodies = articles["body"].tolist()
+
+    prefixed = [INSTRUCTION + b for b in bodies]
 
     print(f"Loading model {MODEL_NAME} on CPU...")
     model = SentenceTransformer(MODEL_NAME, device="cpu")
     print("Model loaded successfully")
 
-    print("Encoding titles...")
+    print("Encoding article bodies...")
     embeddings = model.encode(
-        titles,
+        prefixed,
         normalize_embeddings=True,
         show_progress_bar=True,
-        batch_size=32,
+        batch_size=8,
     )
-    print(f"Encoded {len(embeddings)} titles, shape: {embeddings.shape}")
+    print(f"Encoded {len(embeddings)} bodies, shape: {embeddings.shape}")
 
     table = pa.table({
         "article_id": pa.array(article_ids, type=pa.int64()),
-        "title": pa.array(titles, type=pa.string()),
         "embedding": pa.array([emb.tobytes() for emb in embeddings], type=pa.binary()),
     })
     table.to_pandas().to_parquet(OUTPUT_PATH, index=False)
-    print(f"Saved embeddings to {OUTPUT_PATH}")
-    print(f"Table columns: {table.column_names}")
+    print(f"Saved body embeddings to {OUTPUT_PATH}")
 
 
 if __name__ == "__main__":

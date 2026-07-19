@@ -5,7 +5,7 @@ from sentence_transformers import SentenceTransformer
 
 
 INPUT_FILE = "candidate_data/calibration.f"
-OUTPUT_DIR = "results"
+OUTPUT_DIR = "data"
 OUTPUT_PATH = f"{OUTPUT_DIR}/calibration_query_embeddings.parquet"
 MODEL_NAME = "BAAI/bge-m3"
 INSTRUCTION = "Represent this sentence for searching relevant passages: "
@@ -30,7 +30,7 @@ def main():
         prefixed,
         normalize_embeddings=True,
         show_progress_bar=True,
-        batch_size=32,
+        batch_size=64,
     )
     print(f"Encoded {len(embeddings)} queries, shape: {embeddings.shape}")
 

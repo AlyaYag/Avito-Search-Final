@@ -15,6 +15,9 @@ RUN pip install --no-cache-dir \
     html2text
 
 COPY src/ src/
+COPY candidate_data/ candidate_data/
 COPY run_pipeline.py run_search.py ./
 
-CMD ["python", "run_search.py"]
+RUN mkdir -p data
+
+CMD ["python", "run_pipeline.py"]

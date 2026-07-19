@@ -5,7 +5,7 @@ from typing import Callable
 import numpy as np
 import pandas as pd
 
-from src.utils import average_precision_at_k
+from utils import average_precision_at_k
 
 
 RUNS_DIR = "results/runs"
@@ -13,7 +13,7 @@ RUNS_DIR = "results/runs"
 
 def load_embeddings(path: str) -> tuple[np.ndarray, pd.DataFrame]:
     df = pd.read_parquet(path)
-    emb = np.stack([np.frombuffer(b) for b in df["embedding"].values])
+    emb = np.stack([np.frombuffer(b, dtype=np.float32) for b in df["embedding"].values])
     return emb, df
 
 
@@ -65,12 +65,12 @@ def validate(
         f.write(f"MAP@{top_k}: {map_score:.4f}\n")
         f.write(f"Queries total: {len(query_ids)}\n\n")
 
-        f.write("=" * 60 + "\n")
-        f.write("PER-QUERY AP\n")
-        f.write("=" * 60 + "\n")
-        for qid in query_ids:
-            qid_int = int(qid)
-            f.write(f"query_id={qid_int}  AP={per_query_ap[qid_int]:.4f}\n")
+        ap_path = os.path.join(RUNS_DIR, f"{method_name}_per_query_ap.npy")
+        ap_array = np.array(
+            [(int(qid), per_query_ap[int(qid)]) for qid in query_ids],
+            dtype=[("query_id", np.int32), ("ap", np.float32)],
+        )
+        np.save(ap_path, ap_array)
 
         f.write("\n" + "=" * 60 + "\n")
         f.write("WORST QUERIES (lowest AP)\n")
@@ -80,23 +80,34 @@ def validate(
         query_id_to_text = {int(qid): qt for qid, qt in zip(query_ids, query_texts)}
         query_id_to_gt = {int(qid): gt for qid, gt in zip(query_ids, ground_truths)}
         query_id_to_ranking = {int(qid): r for qid, r in zip(query_ids, rankings)}
+        if "title" in article_df.columns:
+            title_map = dict(zip(article_df["article_id"], article_df["title"]))
+        else:
+            titles_df = pd.read_feather("candidate_data/articles.f")
+            title_map = dict(zip(titles_df["article_id"], titles_df["title"]))
 
         for qid, ap in sorted_queries[:10]:
+            expected_ids = query_id_to_gt[qid].split()
+            expected_str = ", ".join(f"{eid} «{title_map.get(int(eid), '?')}»" for eid in expected_ids)
+            got_ids = query_id_to_ranking[qid]
+            got_str = ", ".join(f"{gid} «{title_map.get(int(gid), '?')}»" for gid in got_ids)
             f.write(f"\nquery_id={qid}  AP={ap:.4f}\n")
             f.write(f"  text:     {query_id_to_text[qid]}\n")
-            f.write(f"  expected: {query_id_to_gt[qid]}\n")
-            f.write(f"  got:      {' '.join(str(a) for a in query_id_to_ranking[qid])}\n")
+            f.write(f"  expected: {expected_str}\n")
+            f.write(f"  got:      {got_str}\n")
 
         f.write("\n" + "=" * 60 + "\n")
         f.write("BEST QUERIES (highest AP)\n")
         f.write("=" * 60 + "\n")
         for qid, ap in sorted_queries[-10:]:
+            expected_ids = query_id_to_gt[qid].split()
+            expected_str = ", ".join(f"{eid} «{title_map.get(int(eid), '?')}»" for eid in expected_ids)
+            got_ids = query_id_to_ranking[qid]
+            got_str = ", ".join(f"{gid} «{title_map.get(int(gid), '?')}»" for gid in got_ids)
             f.write(f"\nquery_id={qid}  AP={ap:.4f}\n")
             f.write(f"  text:     {query_id_to_text[qid]}\n")
-            f.write(f"  expected: {query_id_to_gt[qid]}\n")
-            f.write(f"  got:      {' '.join(str(a) for a in query_id_to_ranking[qid])}\n")
-
-        title_map = dict(zip(article_df["article_id"], article_df["title"]))
+            f.write(f"  expected: {expected_str}\n")
+            f.write(f"  got:      {got_str}\n")
 
         f.write("\n" + "=" * 60 + "\n")
         f.write("WORST ARTICLES (most false positive retrievals)\n")

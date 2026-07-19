@@ -2,6 +2,5 @@
 .DS_Store
 data
 results
-candidate_data
 *.md
 *.csv

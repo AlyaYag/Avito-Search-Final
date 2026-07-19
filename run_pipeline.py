@@ -14,9 +14,11 @@ def run_step(description: str, *args: str) -> None:
 
 
 def main():
-    run_step("Preprocess HTML", "src/preprocess_html.py", "candidate_data/articles.f", "candidate_data/articles_cleaned.f")
-    run_step("Convert HTML to text", "src/html2text_stage.py", "candidate_data/articles_cleaned.f", "candidate_data/articles_text.f")
+    run_step("Preprocess articles", "src/preprocess_articles.py")
+    run_step("Encode queries", "src/encode_queries.py")
     run_step("Encode article titles", "src/encode_articles.py")
+    run_step("Encode article bodies", "src/encode_article_bodies.py")
+    run_step("Rewrite and encode queries", "src/rewrite_queries.py")
 
     print(f"\n{'='*60}")
     print("Pipeline complete")
