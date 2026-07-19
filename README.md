@@ -276,13 +276,3 @@ docker run --rm \
 
 **Важно:** `answer.csv` всегда генерируется через `dense_title` (best method), независимо от того, какие методы валидировались и какие эмбеддинги есть в `data/`.
 
-### Без Docker
-
-```bash
-pip install torch sentence-transformers pandas pyarrow numpy scikit-learn beautifulsoup4 html2text
-python run_pipeline.py
-python run_search.py
-python src/generate_answer.py
-```
-
-Для CPU-версии torch используйте `--extra-index-url https://download.pytorch.org/whl/cpu`.
